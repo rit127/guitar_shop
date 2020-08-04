@@ -1,4 +1,4 @@
-# guitarfashion
+# Guitar Shop Fashion
 
 A new Flutter application.
 
