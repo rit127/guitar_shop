@@ -2,13 +2,15 @@ import 'package:guitarfashion/model/Product.dart';
 
 class ProductState {
   List<Product> products;
-  int page;
+  int start;
+  int end;
   bool isLoading;
 
 
   ProductState({
     this.products,
-    this.page,
+    this.start,
+    this.end,
     this.isLoading,
   });
 }

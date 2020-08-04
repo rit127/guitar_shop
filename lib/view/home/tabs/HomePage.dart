@@ -20,7 +20,8 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<HomePage> {
+class _HomePageState extends State<HomePage>
+    with AutomaticKeepAliveClientMixin<HomePage> {
   List<FavoriteModel> listFavorite;
   UserModel currentUser;
   @override
@@ -30,12 +31,13 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
     context.bloc<ProductBloc>().add(LoadDataEvent());
   }
 
-  getFavorite () async {
+  getFavorite() async {
     UserModel myUser = await AuthRepository.getUser();
 
-    if(myUser != null) {
+    if (myUser != null) {
       print("userModel");
-      List<FavoriteModel> tmpData = await FavoriteRepository.getListFavorite(myUser.customer.toString());
+      List<FavoriteModel> tmpData =
+          await FavoriteRepository.getListFavorite(myUser.customer.toString());
 
       listFavorite = tmpData;
       currentUser = myUser;
@@ -48,29 +50,51 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
         builder: (BuildContext context, ProductState state) {
       if (state.products == null) return Center(child: Loading());
 
-      return ListView(
-        children: <Widget>[
-          listHeader("ទំនិញទើបមកដល់"),
-          GridView.builder(
-            physics: NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: MediaQuery.of(context).size.width /
-                  (MediaQuery.of(context).size.height / 1.6),
+      return NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification scrollInfo) {
+            if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+              context.bloc<ProductBloc>().add(LoadMoreEvent());
+            }
+            return null;
+          },
+          child: RefreshIndicator(
+        onRefresh: () {
+          return Future.delayed(Duration(seconds: 1), () {
+            context.bloc<ProductBloc>().add(LoadDataEvent());
+          });
+        },
+        child: ListView(
+          children: <Widget>[
+            listHeader("ទំនិញទើបមកដល់"),
+            GridView.builder(
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: MediaQuery.of(context).size.width /
+                    (MediaQuery.of(context).size.height / 1.6),
+              ),
+              shrinkWrap: true,
+              padding: EdgeInsets.all(8),
+              itemCount: state.products.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ProductCard(
+                  product: state.products[index],
+                  listFavorite: listFavorite,
+                  currentUser: currentUser,
+                );
+              },
             ),
-            shrinkWrap: true,
-            padding: EdgeInsets.all(8),
-            itemCount: state.products.length,
-            itemBuilder: (BuildContext context, int index) {
-              return ProductCard(
-                product: state.products[index],
-                listFavorite: listFavorite,
-                currentUser: currentUser,
-              );
-            },
-          ),
-        ],
-      );
+            (state.isLoading)
+                ? Container(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(
+                child: Loading(),
+              ),
+            )
+                : Container()
+          ],
+        ),
+      ));
     });
   }
 

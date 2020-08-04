@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:guitarfashion/view/account/ChangePasswordScreen.dart';
 import 'package:guitarfashion/view/account/ForgetPasswordScreen.dart';
 import 'package:guitarfashion/view/account/edit.dart';
+import 'package:guitarfashion/view/category/BrandPage.dart';
 import 'package:guitarfashion/view/category/CategoryScreen.dart';
 import 'package:guitarfashion/view/home/HomeScreen.dart';
 import 'package:guitarfashion/view/home/ProductDetail.dart';
@@ -19,7 +20,10 @@ class RouteGenerator {
       case '/':
         return MaterialPageRoute(builder: (_) => OnBoard());
       case '/cate':
-        return MaterialPageRoute(builder: (_) => CategoryScreen(categoryItem: args,));
+        return MaterialPageRoute(
+            builder: (_) => CategoryScreen(categoryItem: args));
+      case '/brand':
+        return MaterialPageRoute(builder: (_) => BrandPage(brandItem: args));
       case '/login':
         return MaterialPageRoute(builder: (_) => LoginScreen());
       case '/register':

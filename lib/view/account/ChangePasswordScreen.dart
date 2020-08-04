@@ -101,6 +101,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         return Scaffold(
           key: _scaffoldKey,
           appBar: AppBar(
+            centerTitle: true,
             title: Container(
               height: 55,
               child: Image.asset(Res.logo),

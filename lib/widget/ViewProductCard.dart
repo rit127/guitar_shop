@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 
 class ViewProductCard extends StatelessWidget {
   const ViewProductCard({
@@ -33,6 +34,32 @@ class ViewProductCard extends StatelessWidget {
             constraints: BoxConstraints.expand(
               height: MediaQuery.of(context).size.height,
             ),
+//            child: Stack(
+//              alignment: Alignment.bottomRight,
+//              children: <Widget>[
+//                PhotoViewGallery.builder(
+//                  scrollPhysics: const BouncingScrollPhysics(),
+//                  builder: _buildItem,
+//                  itemCount: widget.galleryItems.length,
+//                  loadingBuilder: widget.loadingBuilder,
+//                  backgroundDecoration: widget.backgroundDecoration,
+//                  pageController: widget.pageController,
+//                  onPageChanged: onPageChanged,
+//                  scrollDirection: widget.scrollDirection,
+//                ),
+//                Container(
+//                  padding: const EdgeInsets.all(20.0),
+//                  child: Text(
+//                    "Image ${currentIndex + 1}",
+//                    style: const TextStyle(
+//                      color: Colors.white,
+//                      fontSize: 17.0,
+//                      decoration: null,
+//                    ),
+//                  ),
+//                )
+//              ],
+//            ),
             child: PhotoView(
               imageProvider: imageProvider,
               loadingBuilder: loadingBuilder,

@@ -7,8 +7,8 @@ import 'package:http/http.dart' as http;
 
 class ProductRepository {
 
-  static Future<List<Product>> getProduction() async {
-    var response = await http.get(Api.product + "?_sort=id:DESC");
+  static Future<List<Product>> getProduction(int start, int end) async {
+    var response = await http.get(Api.product + "?_sort=id:DESC&_start=$start&_limit=$end");
 
     if(response.statusCode == 200) {
       //Request Success 200
@@ -29,25 +29,33 @@ class ProductRepository {
       'Authorization': "Bearer",
     };
 
-    String body = "";
-
-    if(listFavorite.length > 0) {
-      listFavorite.map((e){
-//        body += "\"products__favorite\"" + ":\"${e.id}\",";
-        body += "products__favorite=${e.id}&";
-      }).toList();
-
-      body = "${body.substring(0, body.length-1)}";
-
-    }else {
-      body = "{}";
-    }
-
-    print(body);
+//    String body = "";
+//
+//    if(listFavorite.length > 0) {
+//      listFavorite.map((e){
+////        body += "\"products__favorite\"" + ":\"${e.id}\",";
+//        body += "products__favorite=${e.id}&";
+//      }).toList();
+//
+//      body = "${body.substring(0, body.length-1)}";
+//
+//    }else {
+//      body = "{}";
+//    }
+//
+//    print(body);
 //    print(jsonDecode(body));
 //    var submitBody = jsonDecode(body);
 
-    var response = await http.put(Api.customer + "/$customerId", body: body);
+    List<int> allId = listFavorite.map((e) => e.id).toList();
+
+    Map<String, dynamic> submitBody = {
+      'products__favorite': allId,
+    };
+
+    print(jsonEncode(submitBody));
+
+    var response = await http.put(Api.customer + "/$customerId", body: submitBody);
     print(response.body);
 
     if(response.statusCode == 200) {

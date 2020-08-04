@@ -92,39 +92,37 @@ class _FilterBrandState extends State<FilterBrand> {
             children: <Widget>[
               endDrawerHeader(),
 //          filterResultHeader(),
-              ListTile(
-                onTap: () {
-
-                  if (isCheckAll == false) {
-                    checkItem = new Map();
-                  }
-                  isCheckAll = !isCheckAll;
-
-                  state.listProduct = null;
-                  onFilter();
-                },
-                title: Text("មើលទាំងអស់"),
-                trailing: isCheckAll ? Icon(Icons.check) : null,
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Divider(
-                  height: 2,
-                  thickness: 1,
-                ),
-              ),
               ListView.separated(
                 itemCount: widget.myBrands.length,
+                physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    onTap: () => onChecked(widget.myBrands[index].id),
-                    title: Text(widget.myBrands[index].name),
-                    trailing: !isCheckAll
-                        ? checkItem[widget.myBrands[index].id] != null
-                            ? Icon(Icons.check)
-                            : null
-                        : Icon(Icons.check),
+                  return Column(
+                    children: <Widget>[
+                      index == 0 ? ListTile(
+                        onTap: () {
+                          if (isCheckAll == false) {
+                            checkItem = new Map();
+                          }
+                          isCheckAll = !isCheckAll;
+
+                          state.listProduct = null;
+
+                          onFilter();
+                        },
+                        title: Text("មើលទាំងអស់"),
+                        trailing: isCheckAll ? Icon(Icons.check) : null,
+                      ) : Container(),
+                      ListTile(
+                        onTap: () => onChecked(widget.myBrands[index].id),
+                        title: Text(widget.myBrands[index].name),
+                        trailing: !isCheckAll
+                            ? checkItem[widget.myBrands[index].id] != null
+                                ? Icon(Icons.check)
+                                : null
+                            : Icon(Icons.check),
+                      ),
+                    ],
                   );
                 },
                 separatorBuilder: (BuildContext context, int index) {
@@ -141,7 +139,7 @@ class _FilterBrandState extends State<FilterBrand> {
                 height: 50,
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 margin: EdgeInsets.only(
-                    top: MediaQuery.of(context).size.height * 0.15),
+                    top: 30),
                 child: FlatButton(
                   color: AppColor.guitarShopColor,
                   onPressed: onFilter,
@@ -164,7 +162,6 @@ class _FilterBrandState extends State<FilterBrand> {
   Widget endDrawerHeader() {
     return Container(
 //      height: 50,
-
       alignment: Alignment.center,
       padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 20),
       child: Row(

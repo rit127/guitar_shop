@@ -13,21 +13,35 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
   @override
   Stream<ProductState> mapEventToState(ProductEvent event) async* {
-    ProductState productState = new ProductState(products: state.products, page: state.page, isLoading: state.isLoading);
+    ProductState productState = new ProductState(products: state.products, start: state.start, end:  state.end, isLoading: state.isLoading);
 
     // TODO: implement mapEventToState
     if(event is LoadDataEvent){
+      productState.start = 0;
+      productState.end = 10;
       fetchData();
-      productState.page = 1;
       productState.isLoading = true;
-      yield ProductState();
+      yield productState;
+    }
+
+    if(event is LoadMoreEvent) {
+      if(!productState.isLoading) {
+        print("LoadMoreEvent");
+        productState.isLoading = true;
+        fetchData(start: productState.start, end: productState.end);
+        yield productState;
+      }
     }
 
     if(event is UpdateData){
-      print("UpdateData :${productState.page}");
-      productState.products = event.list;
+      if(productState.start == 0 ) {
+        productState.products = event.list;
+      } else {
+        productState.products.addAll(event.list);
+      }
+      productState.start = productState.end + 1;
+      productState.end = productState.end + 10;
       productState.isLoading = false;
-//      productState.page = productState.page+1;
       yield productState;
     }
 
@@ -42,8 +56,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 //    }
   }
 
-  fetchData({int page = 0}) async {
-    List<Product> listPro = await ProductRepository.getProduction();
+  fetchData({int start = 0, int end = 10}) async {
+    List<Product> listPro = await ProductRepository.getProduction(start, end);
     if(listPro.length>0){
       add(UpdateData(listPro));
     }else{

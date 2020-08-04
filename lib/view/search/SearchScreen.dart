@@ -26,6 +26,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
   bool isReady = false;
 
+  TextEditingController _controller = new TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -53,18 +55,40 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   onFilter(String value) {
+    print("value $value");
     setState(() {
       isReady = false;
     });
 
-    List<CategoryMenu> result = listSearch
+    List<CategoryMenu> filterCategory = tmpResultCategory
         .where((element) =>
             element.name.toLowerCase().contains(value.toLowerCase()))
         .toList();
 
+    print("filterCategory $filterCategory");
+
+    List<CategoryMenu> filterBrand = tmpResultBrand
+        .where((element) =>
+            element.name.toLowerCase().contains(value.toLowerCase()))
+        .toList();
+
+    print("filterBrand $filterBrand");
+
     setState(() {
-      value == "" ? listSearch = allData : listSearch = result;
+      value == ""
+          ? resultCategory = tmpResultCategory
+          : resultCategory = filterCategory;
+      value == "" ? resultBrand = tmpResultBrand : resultBrand = filterBrand;
       isReady = true;
+    });
+  }
+
+  onClearText () async {
+    _controller.text = "";
+
+    setState(() {
+      resultCategory = tmpResultCategory;
+      resultBrand = tmpResultBrand;
     });
   }
 
@@ -80,6 +104,7 @@ class _SearchScreenState extends State<SearchScreen> {
         title: Container(
           height: 45,
           child: TextFormField(
+            controller: _controller,
             onChanged: (value) => onFilter(value),
             decoration: InputDecoration(
               fillColor: Colors.white,
@@ -97,9 +122,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
               ),
               suffixIcon: GestureDetector(
-                onTap: () {
-                  //Clear Text
-                },
+                onTap: onClearText,
                 child: Icon(
                   Icons.close,
                   color: HexColor('#8E8E93'),
@@ -126,6 +149,7 @@ class _SearchScreenState extends State<SearchScreen> {
       body: isReady
           ? ListView(
               children: <Widget>[
+                listHeader("ប្រភេទ ​៖​"),
                 ListView.separated(
                   physics: NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
@@ -136,11 +160,32 @@ class _SearchScreenState extends State<SearchScreen> {
                       color: HexColor('#DCDCDC'),
                     );
                   },
-                  itemCount: listSearch.length,
+                  itemCount: resultCategory.length,
                   itemBuilder: (BuildContext context, int index) {
-                    return _searchCard(listSearch[index]);
+                    return _searchCard(resultCategory[index]);
                   },
-                )
+                ),
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: HexColor('#DCDCDC'),
+                ),
+                listHeader("ប្រេន ​៖​"),
+                ListView.separated(
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  separatorBuilder: (BuildContext context, int index) {
+                    return Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: HexColor('#DCDCDC'),
+                    );
+                  },
+                  itemCount: resultBrand.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return _brandCard(resultBrand[index]);
+                  },
+                ),
               ],
             )
           : Center(
@@ -149,10 +194,45 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  Widget listHeader(String title) {
+    return Column(
+      children: <Widget>[
+        Container(
+          height: 50,
+          alignment: Alignment.centerLeft,
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          child: Text(
+            title,
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: HexColor('#DCDCDC'),
+        ),
+      ],
+    );
+  }
+
   Widget _searchCard(CategoryMenu item) {
     return ListTile(
       onTap: () {
         Navigator.pushNamed(context, '/cate', arguments: item);
+      },
+      title: Container(
+        height: 50,
+        alignment: Alignment.centerLeft,
+        padding: EdgeInsets.only(left: 15),
+        child: Text("${item.name}"),
+      ),
+    );
+  }
+
+  Widget _brandCard(CategoryMenu item) {
+    return ListTile(
+      onTap: () {
+        Navigator.pushNamed(context, '/brand', arguments: item);
       },
       title: Container(
         height: 50,

@@ -42,4 +42,17 @@ class BrandsRepository {
     }
     return null;
   }
+
+  static Future<List<Product>> fetchProductByBrandId (String brandId) async {
+    var response = await http.get(Api.product + "?brand.id=$brandId");
+
+    if(response.statusCode == 200) {
+      Iterable list = jsonDecode(response.body);
+      List<Product> listProductOfBrand = list.map((e) => Product.fromJson(e)).toList();
+
+      return listProductOfBrand;
+    }
+
+    return null;
+  }
 }
