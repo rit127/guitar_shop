@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthRepository {
 
+  static const String FAVORITE = 'favorite';
+
   static setUserToken(String userToken) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('userToken', userToken);
@@ -19,13 +21,34 @@ class AuthRepository {
 
   static Future<bool> clearUserToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     return prefs.remove('userToken');
+  }
+
+  static Future<bool> clearFavorite() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.remove(FAVORITE);
+  }
+
+  static setFavorite(List<int> favorite) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    print('setFavorite $favorite');
+    await pref.setStringList(FAVORITE, favorite.map((e) => e.toString()).toList());
+    return 'Done';
+  }
+
+  static Future<List<int>> getFavorite() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<int> favoriteProId = new List();
+
+    List<String> favorite = prefs.getStringList(FAVORITE);
+
+    favorite.forEach((proId) => favoriteProId.add(int.parse(proId)));
+
+    return favoriteProId;
   }
 
   static setCustomer(Customer customer) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     await prefs.setString('customer', jsonEncode(customer));
     return 'Done';
   }
@@ -33,15 +56,14 @@ class AuthRepository {
   static Future<Customer> getCustomer () async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String customer = prefs.getString('customer');
-    print("getCustomer $customer");
-    Customer currentCustomer = Customer.fromJson( jsonDecode(customer));
 
-    return currentCustomer;
+    print("getCustomer $customer");
+    if (customer == null) return null;
+    return Customer.fromJson(jsonDecode(customer));
   }
 
   static Future<bool> clearCustomer() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     return prefs.remove('customer');
   }
 
@@ -58,7 +80,6 @@ class AuthRepository {
 
     if(user != null) {
       UserModel currentUser = UserModel.fromJson(jsonDecode(user),'register');
-
       return currentUser;
     }
 

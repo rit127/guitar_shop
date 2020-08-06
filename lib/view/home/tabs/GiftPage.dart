@@ -32,6 +32,7 @@ class _GiftPageState extends State<GiftPage>
   }
 
   onFirstLoad() async {
+
     String token = await AuthRepository.getUserToken();
 
     if(token != null) {

@@ -128,7 +128,7 @@ class Thumbnail {
   String mime;
   int width;
   int height;
-  double size;
+  double size = 0;
   String path;
   String url;
 
@@ -148,7 +148,10 @@ class Thumbnail {
     mime = json['mime'];
     width = json['width'];
     height = json['height'];
-    size = json['size'];
+    if(json.containsKey('size')){
+      size = double.parse(json['size'].toString());
+    }
+
     path = json['path'];
     url = json['url'];
   }

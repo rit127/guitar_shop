@@ -3,13 +3,17 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:guitarfashion/model/FavoriteModel.dart';
 import 'package:guitarfashion/model/Product.dart';
+import 'package:guitarfashion/model/UserModel.dart';
+import 'package:guitarfashion/repository/AuthRepository.dart';
+import 'package:guitarfashion/repository/FavoriteRepository.dart';
 import 'package:guitarfashion/utils/Api.dart';
+import 'package:guitarfashion/utils/AppEnum.dart';
 import 'package:guitarfashion/utils/HexColor.dart';
 import 'package:guitarfashion/view/home/ProductDetail.dart';
+import 'package:http/http.dart' as http;
 
 class FavoriteCard extends StatefulWidget {
   FavoriteModel data;
-
   FavoriteCard(this.data);
 
   @override
@@ -78,8 +82,16 @@ class _FavoriteCardState extends State<FavoriteCard> with AutomaticKeepAliveClie
                     ),
                     child: IconButton(
                       padding: EdgeInsets.zero,
-                      onPressed: () {
-                        print("test");
+                      onPressed: () async {
+                        UserModel currentUser = await AuthRepository.getUser();
+                        Favorite favorite = await FavoriteRepository.updateFavorite(widget.data.id, currentUser.customer.toString());
+
+                        if (favorite == Favorite.unFavorite) {
+
+                        } else {
+
+                        }
+
                       },
                       icon: Icon(Icons.favorite),
                       color: Colors.red,

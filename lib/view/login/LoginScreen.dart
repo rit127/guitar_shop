@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:guitarfashion/model/Customer.dart';
 import 'package:guitarfashion/model/UserModel.dart';
 import 'package:guitarfashion/repository/AuthRepository.dart';
+import 'package:guitarfashion/repository/FavoriteRepository.dart';
 import 'package:guitarfashion/res.dart';
 import 'package:guitarfashion/utils/Api.dart';
 import 'package:guitarfashion/utils/HexColor.dart';
@@ -26,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isShowPassword = true;
 
   onLogin() async {
+
     FocusScope.of(context).requestFocus(FocusNode());
 
     loadingProgress(context);
@@ -45,14 +47,21 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pop(context);
 
       if(responseData['user']['customer'] == null) {
-        _scaffoldKey.currentState.showSnackBar(showErrorSnackBar(errorMessage: 'ប្រតិបត្តិការបរាជ័យ'));
 
+        _scaffoldKey.currentState.showSnackBar(showErrorSnackBar(errorMessage: 'ប្រតិបត្តិការបរាជ័យ'));
         return;
+      } else {
+        //get list favorite product of customer
+        int customerId = responseData['user']['customer']['id'];
+        FavoriteRepository.getFavoriteProductAndSetToPref(customerId);
+
       }
 
       AuthRepository.setUserToken(responseData['jwt']);
       UserModel myUser = UserModel.fromJson(responseData['user'], 'login');
+
       AuthRepository.setUser(myUser);
+
       AuthRepository.setCurrentPassword(password.trim());
 
       Navigator.pushReplacement(

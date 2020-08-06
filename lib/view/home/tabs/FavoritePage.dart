@@ -24,7 +24,6 @@ class _FavoritePageState extends State<FavoritePage> with AutomaticKeepAliveClie
   String userToken;
   List<FavoriteModel> listFavorite = new List<FavoriteModel>();
   bool isReady = false;
-
   @override
   void initState() {
     super.initState();
@@ -48,14 +47,16 @@ class _FavoritePageState extends State<FavoritePage> with AutomaticKeepAliveClie
   onRequestFavorite() async {
     UserModel currentUser = await AuthRepository.getUser();
     String requestUrl = Api.customer + "/" + currentUser.customer.toString();
-    print(requestUrl);
     var customer = await http.get(requestUrl);
+//    print("customer ${customer.body} ");
 
     if (customer.statusCode == 200) {
       //Request Success 200
       var responseCustomer = jsonDecode(customer.body);
       Iterable list = responseCustomer['products__favorite'];
-            List<FavoriteModel> myFavorite = list.map((e) => FavoriteModel.fromJson(e)).toList();
+      print("list $list");
+      List<FavoriteModel> myFavorite = list.map((e) => FavoriteModel.fromJson(e)).toList();
+      print('myFavorite $myFavorite');
 //      List<Product> myFavorite = list.map((e) async {
 //        Brand cate = await CategoryRepository.getCategoryById(e.toString());
 ////        Product.fromJson(e);

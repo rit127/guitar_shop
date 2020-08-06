@@ -31,15 +31,17 @@ class _ProductCardState extends State<ProductCard> {
   }
 
   onFirstLoad() async {
-    FavoriteModel myFavor = widget.listFavorite.firstWhere(
-        (element) => widget.product.id == element.id,
-        orElse: () => null);
-
-    if (myFavor != null) {
-      setState(() {
-        isFav = true;
-      });
+    if (widget.listFavorite != null){
+      FavoriteModel myFavor = widget.listFavorite.firstWhere(
+          (element) => widget.product.id == element.id,
+          orElse: () => null);
+      if (myFavor != null) {
+        setState(() {
+          isFav = true;
+        });
+      }
     }
+
   }
 
   onFavorite() async {

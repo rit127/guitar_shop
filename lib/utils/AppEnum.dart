@@ -1,0 +1,3 @@
+enum Favorite {
+  favorite, unFavorite
+}
