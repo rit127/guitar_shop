@@ -31,7 +31,7 @@ class RouteGenerator {
       case '/home':
         return MaterialPageRoute(builder: (_) => HomeScreen());
       case '/detail':
-        return MaterialPageRoute(builder: (_) => ProductDetail(args));
+        return MaterialPageRoute(builder: (_) => ProductDetail(args, args, args));
       case '/edit':
         return MaterialPageRoute(builder: (_) => EditScreen(args));
       case '/change_password':

@@ -1,8 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:guitarfashion/bloc/ProductBloc.dart';
 import 'package:guitarfashion/model/CategoryMenu.dart';
 import 'package:guitarfashion/res.dart';
+import 'package:guitarfashion/state/ProductState.dart';
 import 'package:guitarfashion/theme/style.dart';
 import 'package:guitarfashion/utils/Api.dart';
 import 'package:guitarfashion/utils/Trans.dart';
@@ -33,33 +36,38 @@ class MenuScreen extends StatefulWidget {
 class _MenuScreenState extends State<MenuScreen> {
   @override
   Widget build(BuildContext context) {
-    print("length ${widget.listMenu.length}");
     if (widget.listMenu == null) return Container();
 
-    return Drawer(
-      child: SafeArea(
-        child: Container(
-          color: Colors.white,
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
+    return BlocBuilder<ProductBloc, ProductState>(
+      builder: (BuildContext context, ProductState state) {
+        return Drawer(
+          child: SafeArea(
+            child: Container(
+              color: Colors.white,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
 //                SizedBox(height: 25),
-                Container(
-                  height: 120,
-                  padding: EdgeInsets.only(top: 30),
-                  child: Image.asset(Res.logo),
-                ),
-                Divider(thickness: 1, height: 2),
-                SizedBox(height: 30),
-                eachTab(context,
-                    screenName: "ទំព័រដើម", iconPath: Res.hot_coming),
-                ListView.builder(
-                  itemCount: widget.listMenu.length,
-                  shrinkWrap: true,
-                  itemBuilder: (BuildContext context, int index) {
-                    return drawerItem(context, widget.listMenu[index]);
-                  },
-                ),
+                    Container(
+                      height: 120,
+                      padding: EdgeInsets.only(top: 30),
+                      child: Image.asset(Res.logo),
+                    ),
+                    Divider(thickness: 1, height: 2),
+                    SizedBox(height: 30),
+                    eachTab(context,
+                        screenName: "ទំព័រដើម", iconPath: Res.hot_coming),
+                    ListView.builder(
+                      itemCount: widget.listMenu.length,
+                      shrinkWrap: true,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (widget.listMenu[index].category == null) {
+                          return drawerItem(context, widget.listMenu[index]);
+                        }
+
+                        return Container();
+                      },
+                    ),
 
 //                eachTab(context,
 //                    screenName: Trans.hot_coming, iconPath: Res.hot_coming),
@@ -76,73 +84,131 @@ class _MenuScreenState extends State<MenuScreen> {
 //                eachTab(context, screenName: Trans.belt, iconPath: Res.belt),
 //                eachTab(context, screenName: Trans.hat, iconPath: Res.hat),
 //                eachTab(context, screenName: Trans.shoe, iconPath: Res.shoe),
-                SizedBox(height: 12),
-                Divider(thickness: 1, height: 2),
-                eachTab(context,
-                    screenName: Trans.share_app, iconPath: Res.share_app),
-                SizedBox(height: 12),
-              ],
+                    SizedBox(height: 12),
+                    Divider(thickness: 1, height: 2),
+                    eachTab(context,
+                        screenName: Trans.share_app, iconPath: Res.share_app),
+                    SizedBox(height: 12),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   Widget drawerItem(BuildContext context, CategoryMenu category) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pop(context);
-        if (category.name == 'ទំព័រដើម') {
-          Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (BuildContext context) => HomeScreen()));
-        } else {
-          Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (BuildContext context) =>
-                      CategoryScreen(categoryItem: category)));
-        }
-      },
-      child: Container(
-        alignment: Alignment.center,
-        height: 50.0,
-        margin: EdgeInsets.only(top: 3),
-        color: whiteColor,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Expanded(
-              flex: 1,
-              child: Container(
-                height: 35,
-                child: category.iconImage != null
-                    ? Image.network(Api.mainUrl + category.iconImage.url)
-                    : Icon(Icons.error),
-              ),
-            ),
-            Expanded(
-              flex: 4,
-              child: Text(
-                '${category.name}',
-                style: TextStyle(
-                  fontSize: 16,
-                  color:
-                      this.widget.activeScreenName.compareTo(category.name) != 0
-                          ? Color(
-                              getColorHexFromStr('#929292'),
-                            )
-                          : Color(
-                              getColorHexFromStr('#0097A2'),
-                            ),
-                ),
-              ),
-            ),
-          ],
+    if (category.categories.length == 0) {
+      return ListTile(
+        onTap: () {
+          Navigator.pop(context);
+
+          Navigator.pushReplacementNamed(
+            context,
+            '/cate',
+            arguments: category,
+          );
+        },
+        leading: Container(
+          height: 35,
+          child: category.iconImage != null
+              ? Image.network(Api.mainUrl + category.iconImage.url)
+              : Icon(Icons.error),
         ),
+        title: Text(
+          '${category.name}',
+          style: TextStyle(
+            fontSize: 16,
+            color: this.widget.activeScreenName.compareTo(category.name) != 0
+                ? Color(
+                    getColorHexFromStr('#929292'),
+                  )
+                : Color(
+                    getColorHexFromStr('#0097A2'),
+                  ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      alignment: Alignment.center,
+      margin: EdgeInsets.only(top: 8, bottom: 8),
+      color: whiteColor,
+      child: ExpansionTile(
+        leading: Container(
+          height: 35,
+          child: category.iconImage != null
+              ? Image.network(Api.mainUrl + category.iconImage.url)
+              : Icon(Icons.error),
+        ),
+        title: Text(
+          '${category.name}',
+          style: TextStyle(
+            fontSize: 16,
+            color:
+                this.widget.activeScreenName.compareTo(category.name) != 0
+                    ? Color(
+                        getColorHexFromStr('#929292'),
+                      )
+                    : Color(
+                        getColorHexFromStr('#0097A2'),
+                      ),
+          ),
+        ),
+        children: <Widget>[
+          ListView.builder(
+            padding: EdgeInsets.only(left: 20),
+            itemCount: category.categories.length,
+            itemBuilder: (BuildContext context, int index) {
+              Categories item = category.categories[index];
+
+              CategoryMenu currentCate = new CategoryMenu(
+                id: item.id,
+                name: item.name,
+                iconImage: item.icon,
+              );
+
+              return ListTile(
+                onTap: () {
+                  Navigator.pop(context);
+
+                  Navigator.pushNamed(
+                    context,
+                    '/cate',
+                    arguments: currentCate,
+                  );
+                },
+                leading: item.icon != null
+                    ? Image.network(
+                        Api.mainUrl + item.icon.url,
+                        height: 35,
+                        fit: BoxFit.contain,
+                      )
+                    : Icon(Icons.error),
+                title: Text(
+                  '${item.name}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color:
+                        this.widget.activeScreenName.compareTo(item.name) !=
+                                0
+                            ? Color(
+                                getColorHexFromStr('#929292'),
+                              )
+                            : Color(
+                                getColorHexFromStr('#0097A2'),
+                              ),
+                  ),
+                ),
+              );
+            },
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+          ),
+        ],
       ),
     );
   }

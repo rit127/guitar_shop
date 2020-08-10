@@ -9,9 +9,9 @@ class Customer {
   Customer.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
-    profile = json['profile'];
+    profile = json['profile'] != null ? json['profile']['url'] : null;
     phone = json['phone'];
-    point = json['point'];
+    point = json['point'] != null ? json['point']['point_count'].toString() : null;
   }
 
   Map<String, dynamic> toJson() {

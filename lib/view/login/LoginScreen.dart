@@ -7,6 +7,7 @@ import 'package:guitarfashion/repository/AuthRepository.dart';
 import 'package:guitarfashion/repository/FavoriteRepository.dart';
 import 'package:guitarfashion/res.dart';
 import 'package:guitarfashion/utils/Api.dart';
+import 'package:guitarfashion/utils/AppFont.dart';
 import 'package:guitarfashion/utils/HexColor.dart';
 import 'package:guitarfashion/utils/Utils.dart';
 import 'package:guitarfashion/utils/Validation.dart';
@@ -27,7 +28,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isShowPassword = true;
 
   onLogin() async {
-
     FocusScope.of(context).requestFocus(FocusNode());
 
     loadingProgress(context);
@@ -46,15 +46,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
       Navigator.pop(context);
 
-      if(responseData['user']['customer'] == null) {
-
-        _scaffoldKey.currentState.showSnackBar(showErrorSnackBar(errorMessage: 'ប្រតិបត្តិការបរាជ័យ'));
+      if (responseData['user']['customer'] == null) {
+        _scaffoldKey.currentState.showSnackBar(
+            showErrorSnackBar(errorMessage: 'ប្រតិបត្តិការបរាជ័យ'));
         return;
       } else {
         //get list favorite product of customer
         int customerId = responseData['user']['customer']['id'];
         FavoriteRepository.getFavoriteProductAndSetToPref(customerId);
-
       }
 
       AuthRepository.setUserToken(responseData['jwt']);
@@ -81,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  onShowPassword () {
+  onShowPassword() {
     setState(() {
       isShowPassword = !isShowPassword;
     });
@@ -119,6 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
+                      fontFamily: AppFont.mainFont,
                     ),
                   ),
                   SizedBox(height: 0),
@@ -191,24 +191,25 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           SizedBox(height: 5),
           TextFormField(
-              onChanged: (value) {
-                setState(() {
-                  phone = value;
-                });
-              },
-              keyboardType: TextInputType.phone,
+            onChanged: (value) {
+              setState(() {
+                phone = value;
+              });
+            },
+            keyboardType: TextInputType.phone,
 //          validator: validations.validateMobile,
-              decoration: InputDecoration(
-                  fillColor: Color(getColorHexFromStr('#ECEFF0')),
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: EdgeInsets.only(left: 15.0, top: 15.0),
-                  hintText: '+855',
-                  hintStyle:
-                      TextStyle(color: Colors.grey, fontFamily: 'Quicksand'))),
+            decoration: InputDecoration(
+              fillColor: Color(getColorHexFromStr('#ECEFF0')),
+              filled: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: EdgeInsets.only(left: 15.0, top: 15.0),
+              prefixIcon: Icon(Icons.phone,
+                  color: Color(getColorHexFromStr('#8C8C8C')), size: 25.0),
+            ),
+          ),
         ],
       ),
     );
@@ -236,28 +237,27 @@ class _LoginScreenState extends State<LoginScreen> {
               obscureText: isShowPassword,
               validator: (value) => Validation.validationPassword(value),
               decoration: InputDecoration(
-                  fillColor: Color(getColorHexFromStr('#ECEFF0')),
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  prefixIcon: Icon(Icons.lock_open,
-                      color: Color(getColorHexFromStr('#8C8C8C')), size: 25.0),
-                  contentPadding: EdgeInsets.only(left: 15.0, top: 15.0),
+                fillColor: Color(getColorHexFromStr('#ECEFF0')),
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide.none,
+                ),
+                prefixIcon: Icon(Icons.lock_open,
+                    color: Color(getColorHexFromStr('#8C8C8C')), size: 25.0),
+                contentPadding: EdgeInsets.only(left: 15.0, top: 15.0),
 //                  hintText: 'Phone',
-                  hintStyle:
-                      TextStyle(color: Colors.grey, fontFamily: 'Quicksand'),
+                hintStyle:
+                    TextStyle(color: Colors.grey, fontFamily: 'Quicksand'),
                 suffixIcon: IconButton(
                   icon: Icon(
-                    isShowPassword
-                        ? Icons.visibility
-                        : Icons.visibility_off,
+                    isShowPassword ? Icons.visibility : Icons.visibility_off,
                     color: Color(getColorHexFromStr('#8C8C8C')),
                     size: 25.0,
                   ),
                   onPressed: () => onShowPassword(),
-                ),)),
+                ),
+              )),
         ],
       ),
     );

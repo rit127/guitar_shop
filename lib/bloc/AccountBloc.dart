@@ -21,10 +21,12 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     if(event is LoadCustomer) {
       accountState.isLoading = true;
       fetchCustomer(event.customerId);
+      yield accountState;
     }
 
     if (event is UpdateData) {
       accountState.customer = event.customer;
+      await Future.delayed(Duration(microseconds: 300));
       accountState.isLoading = false;
 //      productState.page = productState.page+1;
       yield accountState;

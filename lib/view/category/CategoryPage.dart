@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:guitarfashion/bloc/CategoryBloc.dart';
 import 'package:guitarfashion/event/CategoryEvent.dart';
+import 'package:guitarfashion/event/FavoriteEvent.dart';
 import 'package:guitarfashion/model/CategoryMenu.dart';
 import 'package:guitarfashion/model/FavoriteModel.dart';
 import 'package:guitarfashion/model/UserModel.dart';
@@ -35,11 +36,12 @@ class _CategoryPageState extends State<CategoryPage> {
     super.initState();
     getFavorite();
     getListBrands();
+    context.bloc<CategoryBloc>().add(LoadFavoriteProduct());
     context.bloc<CategoryBloc>().add(LoadCategory(widget.categoryItem.id));
   }
 
   getListBrands() async {
-    List<CategoryMenu> list = await BrandsRepository.fetchBrand();
+    List<CategoryMenu> list = await BrandsRepository.fetchBrandByCategoryId(widget.categoryItem.id.toString());
 
     setState(() {
       listBrands = list;
@@ -53,9 +55,28 @@ class _CategoryPageState extends State<CategoryPage> {
       print("userModel");
       List<FavoriteModel> tmpData = await FavoriteRepository.getListFavorite(myUser.customer.toString());
 
-      listFavorite = tmpData;
-      currentUser = myUser;
+      setState(() {
+        listFavorite = tmpData;
+        currentUser = myUser;
+      });
     }
+  }
+
+  onFavorite (List<FavoriteModel> listFav, String proId) async {
+    bool isFavorite = false;
+
+    if (listFav != null){
+      FavoriteModel myFavor = listFav.firstWhere(
+              (element) => proId == element.id.toString(),
+          orElse: () => null);
+
+      if (myFavor != null) {
+        isFavorite = true;
+      }
+    }
+
+    context.bloc<CategoryBloc>().add(UpdateFavorite(proId, !isFavorite));
+    await FavoriteRepository.updateFavorite(int.parse(proId), currentUser.customer.toString());
   }
 
   @override
@@ -86,8 +107,9 @@ class _CategoryPageState extends State<CategoryPage> {
                       itemBuilder: (BuildContext context, int index) {
                         return ProductCard(
                           product: state.listProduct[index],
-                          listFavorite: listFavorite,
+                          listFavorite: state.listFavorite,
                           currentUser: currentUser,
+                          onFavorite: () => onFavorite(state.listFavorite, state.listProduct[index].id.toString()),
                         );
                       },
                     ),

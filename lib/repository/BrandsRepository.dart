@@ -21,6 +21,20 @@ class BrandsRepository {
     return null;
   }
 
+  static Future<List<CategoryMenu>> fetchBrandByCategoryId(String categoryId) async {
+    var response = await http.get("https://guitar.kravanh.co/brands?products.category=$categoryId");
+
+    if(response.statusCode == 200) {
+      //Request Success 200
+      Iterable list = jsonDecode(response.body);
+      List<CategoryMenu> listBrand = list.map((e) => CategoryMenu.fromJson(e)).toList();
+
+      return listBrand;
+    }
+
+    return null;
+  }
+
   static Future<List<Product>> fetchCategoryOfBrands(int categoryId, Map<int, int> selectedBrands) async {
     if(selectedBrands.length > 0) {
       String txtWhereIn = "";
@@ -29,7 +43,7 @@ class BrandsRepository {
         txtWhereIn += "&brand.id_in=$value";
       });
 
-      var response = await http.get(Api.product + "?category.id=$categoryId$txtWhereIn");
+      var response = await http.get(Api.product + "?category.id=$categoryId$txtWhereIn&_sort=id:DESC");
 
       if(response.statusCode == 200) {
         //Request Status 200

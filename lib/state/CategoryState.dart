@@ -1,4 +1,5 @@
 import 'package:guitarfashion/model/CategoryMenu.dart';
+import 'package:guitarfashion/model/FavoriteModel.dart';
 import 'package:guitarfashion/model/Product.dart';
 
 class CategoryState {
@@ -8,6 +9,7 @@ class CategoryState {
   bool isLoading;
   bool isFilter;
   String categoryName;
+  List<FavoriteModel> listFavorite;
 
   CategoryState({
     this.listProduct,
@@ -16,5 +18,6 @@ class CategoryState {
     this.isLoading,
     this.isFilter,
     this.categoryName,
+    this.listFavorite,
   });
 }

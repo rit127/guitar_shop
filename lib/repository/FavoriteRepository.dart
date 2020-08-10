@@ -26,6 +26,23 @@ class FavoriteRepository {
     return null;
   }
 
+  static Future<List<FavoriteModel>> getListFavoritePagination ({String customerId, int start, int end}) async {
+    String requestUrl = Api.customer + "/" + customerId.toString() + "?_start=$start&_end=$end";
+
+    var response = await http.get(requestUrl);
+
+    if(response.statusCode == 200) {
+      //Request Success
+      var responseCustomer = jsonDecode(response.body);
+      Iterable list = responseCustomer['products__favorite'];
+      List<FavoriteModel> myFavorite = list.map((e) => FavoriteModel.fromJson(e)).toList();
+
+      return myFavorite;
+    }
+
+    return null;
+  }
+
   static Future<Favorite> updateFavorite(int productId, String customerId) async {
     Favorite favorite;
     List<int> customerFavorite  = await AuthRepository.getFavorite();

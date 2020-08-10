@@ -6,6 +6,7 @@ import 'package:guitarfashion/model/UserModel.dart';
 import 'package:guitarfashion/repository/AuthRepository.dart';
 import 'package:guitarfashion/res.dart';
 import 'package:guitarfashion/utils/Api.dart';
+import 'package:guitarfashion/utils/AppFont.dart';
 import 'package:guitarfashion/utils/HexColor.dart';
 import 'package:guitarfashion/utils/Utils.dart';
 import 'package:guitarfashion/utils/Validation.dart';
@@ -77,6 +78,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       Navigator.pop(context);
 
       String errorMSG = responseData["message"][0]["messages"][0]["message"];
+      if(errorMSG == 'Email is already taken.')
+        errorMSG = 'លេខទូរសព្ទរបស់អ្នកត្រូវបានចុះឈ្មោះរួចហើយ';
       _scaffoldKey.currentState
           .showSnackBar(showErrorSnackBar(errorMessage: errorMSG));
     }
@@ -235,7 +238,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             onSaved: (String val) {
               _username = val;
             },
+            maxLength: 30,
+            maxLengthEnforced: true,
             decoration: InputDecoration(
+              counterText: "",
               fillColor: Color(getColorHexFromStr('#ECEFF0')),
               filled: true,
               border: OutlineInputBorder(
@@ -246,7 +252,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   color: Color(getColorHexFromStr('#8C8C8C')), size: 25.0),
               contentPadding: EdgeInsets.only(left: 15.0, top: 15.0),
 //                  hintText: 'Phone',
-              hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Quicksand'),
+//              hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Quicksand'),
             ),
           ),
         ],
@@ -279,9 +285,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide.none,
               ),
+              prefixIcon: Icon(Icons.phone,
+                  color: Color(getColorHexFromStr('#8C8C8C')), size: 25.0),
               contentPadding: EdgeInsets.only(left: 15.0, top: 15.0),
-              hintText: '+855',
-              hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Quicksand'),
+//              hintText: '+855',
+//              hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Quicksand'),
             ),
           ),
         ],
@@ -403,7 +411,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               color: Colors.white,
               fontSize: 18.0,
               fontWeight: FontWeight.bold,
-              fontFamily: "OpenSans",
+              fontFamily: AppFont.mainFont,
             ),
           ),
           onPressed: _validateInputs,

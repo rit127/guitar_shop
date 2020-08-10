@@ -9,7 +9,7 @@
 
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="guitarfashion"
+        android:label="Guitar Fashion Shop"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

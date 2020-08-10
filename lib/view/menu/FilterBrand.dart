@@ -64,7 +64,6 @@ class _FilterBrandState extends State<FilterBrand> {
         categoryName = widget.myBrands.firstWhere((element) => element.id == brandId, orElse: null).name;
       });
     }
-    print("checked ${checkItem.values}");
   }
 
   onFilter() async {

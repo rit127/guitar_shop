@@ -28,6 +28,17 @@ class LoadCategoryByBrands extends CategoryEvent {
   List<Object> get props => [this.categoryId, this.listBrand, this.categoryName];
 }
 
+class UpdateFavorite extends CategoryEvent {
+  String productId;
+  bool status;
+
+  UpdateFavorite(this.productId, this.status);
+
+  @override
+  // TODO: implement props
+  List<Object> get props => [productId, status];
+}
+
 class UpdateData extends CategoryEvent{
 
   List<Product> list;
@@ -37,6 +48,12 @@ class UpdateData extends CategoryEvent{
   @override
   // TODO: implement props
   List<Object> get props => [list];
+}
+
+class LoadFavoriteProduct extends CategoryEvent {
+  @override
+  // TODO: implement props
+  List<Object> get props => null;
 }
 
 class FinishLoadData extends CategoryEvent{

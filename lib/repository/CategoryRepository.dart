@@ -12,7 +12,9 @@ class CategoryRepository {
 
     if(response.statusCode == 200) {
       Iterable data = jsonDecode(response.body);
+
       List<CategoryMenu> listCategory = data.map((e) => CategoryMenu.fromJson(e)).toList();
+      print(listCategory);
 
       return listCategory;
     }

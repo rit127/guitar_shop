@@ -35,6 +35,12 @@ class _CategoryScreenState extends State<CategoryScreen> {
             actions: <Widget>[
               IconButton(
                 onPressed: () {
+                  Navigator.pushNamed(context, '/search');
+                },
+                icon: Icon(Icons.search),
+              ),
+              IconButton(
+                onPressed: () {
                   Navigator.pushNamed(context, '/notification');
                 },
                 icon: Icon(Icons.notifications),

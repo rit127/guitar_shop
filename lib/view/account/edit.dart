@@ -99,6 +99,7 @@ class _EditScreenState extends State<EditScreen> {
       builder: (BuildContext context, AccountState state) {
         return Scaffold(
           appBar: AppBar(
+            centerTitle: true,
             title: Container(
               height: 55,
               child: Image.asset(Res.logo),
@@ -166,7 +167,9 @@ class _EditScreenState extends State<EditScreen> {
                               onSaved: (value) {
                                 _username = value.trim();
                               },
+                              maxLength: 30,
                               decoration: InputDecoration(
+                                counterText: "",
                                 fillColor: HexColor('#ECEFF0'),
                                 filled: true,
                                 border: OutlineInputBorder(

@@ -9,19 +9,26 @@ class UnAuthorize extends StatefulWidget {
 class _UnAuthorizeState extends State<UnAuthorize> {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: FlatButton(
-        color: AppColor.guitarShopColor,
-        onPressed: () {
-          Navigator.pushNamed(context, '/login');
-        },
-        child: Text(
-          "Login",
-          style: TextStyle(
-            color: Colors.white,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text("សូមធ្វើការចូល ដើម្បីប្រើប្រាស់មុខងារនេះ"),
+        SizedBox(height: 8),
+        Center(
+          child: FlatButton(
+            color: AppColor.guitarShopColor,
+            onPressed: () {
+              Navigator.pushNamed(context, '/login');
+            },
+            child: Text(
+              "ចូល",
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

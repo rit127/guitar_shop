@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:guitarfashion/enums/device_screen_type.dart';
 import 'package:guitarfashion/repository/AuthRepository.dart';
 import 'package:guitarfashion/res.dart';
 import 'package:guitarfashion/utils/HexColor.dart';
+import 'package:guitarfashion/utils/ui_utils.dart';
 import 'package:guitarfashion/view/home/HomeScreen.dart';
 import 'package:guitarfashion/view/onboard/BoardOne.dart';
 import 'package:guitarfashion/view/onboard/BoardThree.dart';
@@ -60,6 +62,22 @@ class _OnBoardState extends State<OnBoard> {
 
   @override
   Widget build(BuildContext context) {
+    var currentHeight = MediaQuery.of(context).size.height;
+    var currentWidth = MediaQuery.of(context).size.width;
+
+    double imageWidth = 0;
+    int addOne = 0;
+    DeviceScreenType screenType = getDeviceType(MediaQuery.of(context));
+
+    if(screenType == DeviceScreenType.Mobile) {
+      imageWidth = 500;
+      if(currentWidth < 321) {
+        imageWidth = 400;
+        addOne = 50;
+      }
+    } else {
+      imageWidth = 500;
+    }
 
     if(!isReady) {
       return Scaffold();
@@ -72,8 +90,8 @@ class _OnBoardState extends State<OnBoard> {
             right: -250,
             top: -150,
             child: Container(
-              height: 500,
-              width: 500,
+              height: imageWidth,
+              width: imageWidth,
               decoration: BoxDecoration(
                 color: currentIndex != 1 ? HexColor('#B3E6E9') : HexColor('#ECBBC0'),
                 borderRadius: BorderRadius.all(
@@ -86,8 +104,8 @@ class _OnBoardState extends State<OnBoard> {
             left: -350,
             bottom: -350,
             child: Container(
-              height: 500,
-              width: 500,
+              height: imageWidth + addOne,
+              width: imageWidth + addOne,
               decoration: BoxDecoration(
                 color: currentIndex != 1 ? HexColor('#ECBBC0') : HexColor('#B3E7E9'),
                 borderRadius: BorderRadius.all(
@@ -148,8 +166,11 @@ class _OnBoardState extends State<OnBoard> {
   }
 
   Widget customPagination (int index) {
+    var currentHeight = MediaQuery.of(context).size.height;
+    var currentWidth = MediaQuery.of(context).size.width;
+
     return Positioned(
-      bottom: 100,
+      bottom: currentWidth < 321 ? currentHeight * 0.1 : currentHeight * 0.15,
       left: MediaQuery.of(context).size.width / 2- 30,
       child: Container(
         child: Row(

@@ -7,6 +7,7 @@ class Validation {
     if(txtValue.length < 3 ) {
       return "Username must be more than 2 character";
     }
+
     return null;
   }
 

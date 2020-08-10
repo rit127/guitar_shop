@@ -1,4 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:grouped_list/grouped_list.dart';
+import 'package:guitarfashion/model/NotificationMessage.dart';
+import 'package:guitarfashion/model/UserModel.dart';
+import 'package:guitarfashion/repository/AuthRepository.dart';
+import 'package:guitarfashion/utils/Api.dart';
+import 'package:guitarfashion/utils/HexColor.dart';
+import 'package:guitarfashion/utils/Loading.dart';
+import 'package:http/http.dart' as http;
+import 'package:timeago/timeago.dart' as timeago;
 
 class NotificationScreen extends StatefulWidget {
   @override
@@ -6,64 +17,129 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
+  List<NotificationMessage> listNotification;
 
   @override
   void initState() {
     super.initState();
+    onFirstLoad();
   }
 
   onFirstLoad() async {
-
+    await getNotification();
   }
 
-  getNotification () async {
+  getNotification() async {
+    UserModel userModel = await AuthRepository.getUser();
 
+    String requestUrl = "";
+
+    if (userModel != null) {
+      requestUrl = "https://guitar.kravanh.co/messages";
+    } else {
+      requestUrl = "https://guitar.kravanh.co/messages?reciever_ne=user";
+    }
+
+    var response = await http.get(requestUrl);
+
+    if (response.statusCode == 200) {
+      Iterable list = jsonDecode(response.body);
+      List<NotificationMessage> listNoti =
+          list.map((e) => NotificationMessage.fromJson(e)).toList();
+
+      setState(() {
+        listNotification = listNoti;
+      });
+    }
   }
-  
+
+  convertDateToShort(String txtDate) {
+    String shortDate = txtDate.split(' ')[0];
+
+    return shortDate;
+  }
+
+  Future<void> onRefresh() async {
+    await Future.delayed(Duration(seconds: 1), () async {
+      await getNotification();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    DateTime today = DateTime.now().toLocal();
+    String myToday = convertDateToShort(today.toLocal().toString());
+
     return Scaffold(
       appBar: AppBar(
         title: Text('ការផ្តល់ដំណឹង'),
         centerTitle: true,
       ),
-      body: ListView(
-        children: <Widget>[
-          headerDate('ថ្ងៃនេះ'),
-          notificationCard('images/notification/noti_1.png', "ពិន្ទុ150ប្តូរបាន កាបូបដាក់លុយដ៏ស្រស់ស្អាតមួយរួសរាន់ឡើងចំនួនមានកំណត់","1 នាទីមុ​ន"),
-          headerDate('23-06-2019'),
-          notificationCard('images/notification/noti_2.png', "ទំនិញថ្មីទើបមកដល់ស្អាតៗច្រើនម៉ូតតោះចូលមើលទាំងអស់គ្នា !!", "1:22 រសៀល"),
-          headerDate('25-05-2019'),
-          Divider(),
-          notificationCard('images/notification/noti_3.png', "បញ្ចុះតម្លៃ15%រាល់ការទិញទំនិញចាប់ពី 200\$", "9:00 ព្រឹក"),
-          Divider(),
-          notificationCard('images/notification/noti_2.png', "ទំនិញថ្មីទើបមកដល់ស្អាតៗច្រើនម៉ូតតោះចូលមើលទាំងអស់គ្នា !!", "4:30 រសៀល"),
-          Divider(),
-          notificationCard('images/notification/noti_3.png', "បញ្ចុះតម្លៃ15%រាល់ការទិញទំនិញចាប់ពី 200\$", "9:00 ព្រឹក"),
-          Divider(),
-          notificationCard('images/notification/noti_2.png', "ទំនិញថ្មីទើបមកដល់ស្អាតៗច្រើនម៉ូតតោះចូលមើលទាំងអស់គ្នា !!", "4:30 រសៀល"),
-        ],
-      ),
+      body: listNotification != null
+          ? RefreshIndicator(
+              onRefresh: onRefresh,
+              child: GroupedListView<NotificationMessage, String>(
+                physics: AlwaysScrollableScrollPhysics(),
+                elements: listNotification,
+                groupBy: (element) => convertDateToShort(
+                    DateTime.parse(element.createdAt).toLocal().toString()),
+                groupSeparatorBuilder: (String date) {
+                  DateTime currentDate = DateTime.parse(date).toLocal();
+
+                  if (myToday ==
+                      convertDateToShort(currentDate.toLocal().toString())) {
+                    return headerDate("ថ្ងៃនេះ");
+                  }
+
+                  String value = currentDate.day.toString() +
+                      "-" +
+                      currentDate.month.toString() +
+                      "-" +
+                      currentDate.year.toString();
+                  return headerDate(value);
+                },
+                itemBuilder: (context, NotificationMessage element) =>
+                    notificationCard(element),
+                order: GroupedListOrder.DESC,
+              ),
+            )
+          : Center(
+              child: Loading(),
+            ),
     );
   }
 
-  Widget headerDate (String date) {
+  Widget headerDate(String date) {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: 20,
-        vertical: 20,
+        vertical: 12,
       ),
-      child: Text(date, style: TextStyle(fontSize: 16),),
+      child: Text(
+        date,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 
-  Widget notificationCard(String icon, String title, String dateTime) {
+  Widget notificationCard(NotificationMessage item) {
+    DateTime txtDate = DateTime.parse(item.createdAt);
+
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 8),
+//      padding: EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+          border: Border.symmetric(
+              vertical: BorderSide(width: 1, color: HexColor('#ECEFF0')))),
       child: ListTile(
-        leading: Image.asset(icon, height: 35,),
-        title: Text(title),
-        subtitle: Text(dateTime),
+        leading: Image.network(
+          Api.mainUrl + item.icon.url,
+          height: 35,
+        ),
+        title: Text(item.title),
+        subtitle: Text(timeago.format(txtDate)),
       ),
     );
   }

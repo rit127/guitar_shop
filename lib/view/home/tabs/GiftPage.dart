@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:guitarfashion/bloc/ProductBloc.dart';
+import 'package:guitarfashion/event/ProductEvent.dart';
 import 'package:guitarfashion/model/Customer.dart';
+import 'package:guitarfashion/model/FavoriteModel.dart';
 import 'package:guitarfashion/model/UserModel.dart';
 import 'package:guitarfashion/repository/AccountRepository.dart';
 import 'package:guitarfashion/repository/AuthRepository.dart';
+import 'package:guitarfashion/repository/FavoriteRepository.dart';
 import 'package:guitarfashion/res.dart';
+import 'package:guitarfashion/state/ProductState.dart';
 import 'package:guitarfashion/utils/AppColor.dart';
+import 'package:guitarfashion/utils/AppFont.dart';
 import 'package:guitarfashion/utils/HexColor.dart';
 import 'package:guitarfashion/utils/Loading.dart';
 import 'package:guitarfashion/view/auth/UnAuthorize.dart';
@@ -17,13 +24,17 @@ class GiftPage extends StatefulWidget {
 }
 
 class _GiftPageState extends State<GiftPage>
-    with TickerProviderStateMixin<GiftPage>, AutomaticKeepAliveClientMixin<GiftPage> {
+    with
+        TickerProviderStateMixin<GiftPage>,
+        AutomaticKeepAliveClientMixin<GiftPage> {
   TabController _tabController;
   int currentIndex = 0;
   String userToken;
 
   bool isReady = false;
   Customer customer;
+  UserModel currentUser;
+
   @override
   void initState() {
     super.initState();
@@ -32,19 +43,25 @@ class _GiftPageState extends State<GiftPage>
   }
 
   onFirstLoad() async {
-
     String token = await AuthRepository.getUserToken();
 
-    if(token != null) {
+    if (token != null) {
       UserModel myUser = await AuthRepository.getUser();
-      Customer myCustomer = await AccountRepository.fetchCustomer(myUser.customer.toString());
+      Customer myCustomer =
+          await AccountRepository.fetchCustomer(myUser.customer.toString());
       userToken = token;
+      currentUser = myUser;
       customer = myCustomer;
     }
-    await Future.delayed(Duration(milliseconds: 500));
 
     setState(() {
       isReady = true;
+    });
+  }
+
+  Future<void> onRefresh () async {
+    await Future.delayed(Duration(seconds: 1), () async {
+      context.bloc<ProductBloc>().add(LoadFavoriteProduct());
     });
   }
 
@@ -62,42 +79,48 @@ class _GiftPageState extends State<GiftPage>
       return UnAuthorize();
     }
 
-    return ListView(
-      children: <Widget>[
-        headerList(),
-        pointSection(),
-        SizedBox(height: 20),
-        Column(
-          children: <Widget>[
-            Container(
-              child: Container(
-                height: 55,
-                decoration: new BoxDecoration(
-                  border: Border.symmetric(
-                    vertical: BorderSide(
-                      width: 0.5,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-                child: new TabBar(
-                  onTap: (index) {
-                    _tabController.animateTo(index);
-                    setState(() {
-                      currentIndex = index;
-                    });
-                  },
-                  controller: _tabController,
-                  indicatorColor: AppColor.guitarShopColor,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  unselectedLabelStyle: TextStyle(
-                    color: HexColor('#BDBDBD'),
-                  ),
-                  labelStyle: TextStyle(
-                    fontSize: 15,
-                    color: AppColor.guitarShopColor,
-                  ),
-                  tabs: [
+    return BlocBuilder<ProductBloc, ProductState>(
+      builder: (BuildContext context, ProductState state) {
+        return RefreshIndicator(
+          onRefresh: onRefresh,
+          child: ListView(
+            children: <Widget>[
+              headerList(),
+              pointSection(),
+              SizedBox(height: 20),
+              Column(
+                children: <Widget>[
+                  Container(
+                    child: Container(
+                      height: 55,
+                      decoration: new BoxDecoration(
+                        border: Border.symmetric(
+                          vertical: BorderSide(
+                            width: 0.5,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                      child: new TabBar(
+                        onTap: (index) {
+                          _tabController.animateTo(index);
+                          setState(() {
+                            currentIndex = index;
+                          });
+                        },
+                        controller: _tabController,
+                        indicatorColor: AppColor.guitarShopColor,
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        unselectedLabelStyle: TextStyle(
+                          color: HexColor('#BDBDBD'),
+                          fontFamily: AppFont.mainFont,
+                        ),
+                        labelStyle: TextStyle(
+                          fontSize: 15,
+                          color: AppColor.guitarShopColor,
+                          fontFamily: AppFont.mainFont,
+                        ),
+                        tabs: [
 //                    Tab(
 //                      child: Container(
 //                        margin: EdgeInsets.symmetric(vertical: 5),
@@ -109,19 +132,24 @@ class _GiftPageState extends State<GiftPage>
 //                        child: Text('រង្វាន់'),
 //                      ),
 //                    ),
-                    Tab(text: 'រង្វាន់'),
-                    Tab(text: 'រង្វាន់ធ្លាប់ប្តូរ'),
-                  ],
-                ),
-              ),
-            ),
-            Container(
+                          Tab(text: 'រង្វាន់'),
+                          Tab(text: 'រង្វាន់ធ្លាប់ប្តូរ'),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Container(
 //              height: screenHeight,
-              child: currentIndex == 0 ? GiftTab() : GiftChangedTab(),
-            ),
-          ],
-        ),
-      ],
+                    child: currentIndex == 0
+                        ? GiftTab(state.listFavorite, currentUser)
+                        : GiftChangedTab(state.listFavorite, currentUser),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -174,10 +202,9 @@ class _GiftPageState extends State<GiftPage>
             child: Text(
               "ពិន្ទុ​របស់​អ្នក",
               style: TextStyle(
-                fontSize: 16,
-                color: AppColor.guitarShopColor,
-                fontWeight: FontWeight.bold
-              ),
+                  fontSize: 16,
+                  color: AppColor.guitarShopColor,
+                  fontWeight: FontWeight.bold),
             ),
           ),
         ],

@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:guitarfashion/bloc/AccountBloc.dart';
-import 'package:guitarfashion/event/AccountEvent.dart';
+import 'package:guitarfashion/bloc/ProductBloc.dart';
+import 'package:guitarfashion/event/AccountEvent.dart' as ae;
+import 'package:guitarfashion/event/ProductEvent.dart';
 import 'package:guitarfashion/model/Customer.dart';
 import 'package:guitarfashion/model/UserModel.dart';
 import 'package:guitarfashion/repository/AuthRepository.dart';
@@ -37,13 +39,15 @@ class _AccountPageState extends State<AccountPage> {
   onFirstLoad() async {
     String token = await AuthRepository.getUserToken();
 
-    if(token != null) {
+    if (token != null) {
       UserModel myUser = await AuthRepository.getUser();
       currentUser = myUser;
-      context.bloc<AccountBloc>().add(LoadCustomer(myUser.customer.toString()));
+      context
+          .bloc<AccountBloc>()
+          .add(ae.LoadCustomer(myUser.customer.toString()));
     } else {
       //UnAuth
-      context.bloc<AccountBloc>().add(FinishLoadData());
+      context.bloc<AccountBloc>().add(ae.FinishLoadData());
     }
 
     setState(() {
@@ -80,16 +84,13 @@ class _AccountPageState extends State<AccountPage> {
     await AuthRepository.clearCurrentPassword();
     await AuthRepository.clearCustomer();
 
+    context.bloc<ProductBloc>().add(ClearFavorite());
+
     await Future.delayed(Duration(milliseconds: 300));
 
     Navigator.pop(context);
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (BuildContext context) => HomeScreen(),
-      ),
-    );
+    Navigator.pushReplacementNamed(context, '/');
   }
 
   @override
@@ -126,9 +127,15 @@ class _AccountPageState extends State<AccountPage> {
                       children: <Widget>[
                         Container(
                           height: 100,
-//                          width: 100,
-                          child: Image.asset(
-                            Res.account,
+                          width: 100,
+                          child: state.customer.profile == null
+                              ?  CircleAvatar(
+                            backgroundImage: AssetImage(Res.account),
+                          )
+                              :CircleAvatar(
+                            backgroundImage: NetworkImage(
+                              Api.mainUrl + state.customer.profile,
+                            ),
                           ),
                         ),
                         Positioned(

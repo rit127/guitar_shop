@@ -1,13 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:guitarfashion/model/FavoriteModel.dart';
 import 'package:guitarfashion/model/RewardModel.dart';
 import 'package:guitarfashion/utils/Api.dart';
 import 'package:guitarfashion/utils/HexColor.dart';
+import 'package:guitarfashion/view/home/ProductDetail.dart';
 
 class GiftCard extends StatefulWidget {
   final RewardModel data;
+  List<FavoriteModel> listFavorite;
+  Function onSubmit;
 
-  GiftCard(this.data);
+  GiftCard(this.data, this.listFavorite, this.onSubmit);
 
   @override
   _GiftCardState createState() => _GiftCardState();
@@ -17,13 +21,23 @@ class _GiftCardState extends State<GiftCard> {
   @override
   Widget build(BuildContext context) {
 
-    if(widget.data.product == null) {
+
+    if (widget.data.product == null) {
       return Container();
     }
 
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, '/detail', arguments: widget.data.product.id);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => ProductDetail(
+              widget.data.product.id,
+              widget.listFavorite,
+              widget.onSubmit,
+            ),
+          ),
+        );
       },
       child: Container(
         height: 150,
@@ -39,7 +53,8 @@ class _GiftCardState extends State<GiftCard> {
               height: 150,
               padding: EdgeInsets.all(8),
               child: CachedNetworkImage(
-                imageUrl: Api.mainUrl + widget.data.product.images[0].formats.medium.url,
+                imageUrl: Api.mainUrl +
+                    widget.data.product.images[0].formats.medium.url,
                 imageBuilder: (context, imageProvider) => Container(
                   margin: EdgeInsets.all(5),
                   decoration: BoxDecoration(
@@ -98,7 +113,9 @@ class _GiftCardState extends State<GiftCard> {
                         ),
                       ),
                       Text(
-                        widget.data.point != null ? widget.data.point.toString() : "0",
+                        widget.data.point != null
+                            ? widget.data.point.toString()
+                            : "0",
                         style: TextStyle(
                           color: HexColor('#FF9D00'),
                           fontSize: 15,

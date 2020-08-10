@@ -25,9 +25,10 @@ class _SearchScreenState extends State<SearchScreen> {
   List<CategoryMenu> tmpResultBrand = [];
 
   bool isReady = false;
+  bool isFirst = false;
 
   TextEditingController _controller = new TextEditingController();
-
+  FocusNode fSearch = FocusNode();
   @override
   void initState() {
     super.initState();
@@ -50,12 +51,21 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     setState(() {
+      fSearch.requestFocus();
       isReady = true;
     });
   }
 
   onFilter(String value) {
-    print("value $value");
+
+    if(value.trim() == ""){
+      setState(() {
+        isFirst = false;
+      });
+
+      return;
+    }
+
     setState(() {
       isReady = false;
     });
@@ -65,132 +75,151 @@ class _SearchScreenState extends State<SearchScreen> {
             element.name.toLowerCase().contains(value.toLowerCase()))
         .toList();
 
-    print("filterCategory $filterCategory");
-
     List<CategoryMenu> filterBrand = tmpResultBrand
         .where((element) =>
             element.name.toLowerCase().contains(value.toLowerCase()))
         .toList();
-
-    print("filterBrand $filterBrand");
 
     setState(() {
       value == ""
           ? resultCategory = tmpResultCategory
           : resultCategory = filterCategory;
       value == "" ? resultBrand = tmpResultBrand : resultBrand = filterBrand;
+      isFirst = true;
       isReady = true;
     });
   }
 
-  onClearText () async {
+  onClearText() async {
     _controller.text = "";
 
     setState(() {
       resultCategory = tmpResultCategory;
       resultBrand = tmpResultBrand;
+      isFirst = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: HexColor('#ECEFF0'),
-        elevation: 0,
-        leading: null,
-        automaticallyImplyLeading: false,
-        title: Container(
-          height: 45,
-          child: TextFormField(
-            controller: _controller,
-            onChanged: (value) => onFilter(value),
-            decoration: InputDecoration(
-              fillColor: Colors.white,
-              filled: true,
-              hintText: "ស្វែករក",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-                borderSide: BorderSide.none,
+      body:  SafeArea(
+        child: Column(
+                children: <Widget>[
+                  searchBar(),
+                  isFirst ? isReady ? Expanded(
+                    child: ListView(
+                      children: <Widget>[
+                        ListView.separated(
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          separatorBuilder: (BuildContext context, int index) {
+                            return Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: HexColor('#DCDCDC'),
+                            );
+                          },
+                          itemCount: resultCategory.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return _searchCard(resultCategory[index]);
+                          },
+                        ),
+                        ListView.separated(
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          separatorBuilder: (BuildContext context, int index) {
+                            return Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: HexColor('#DCDCDC'),
+                            );
+                          },
+                          itemCount: resultBrand.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return _brandCard(resultBrand[index]);
+                          },
+                        ),
+                      ],
+                    ),
+                  ) : Expanded(
+                    child: Center(
+                      child: Loading(),
+                    ),
+                  ) : Container(),
+                ],
               ),
-              prefixIcon: Container(
-                margin: EdgeInsets.only(bottom: 5),
-                child: Icon(
-                  Icons.search,
-                  color: HexColor('#8E8E93'),
+      ),
+    );
+  }
+
+  Widget searchBar() {
+    return Container(
+      height: 70,
+      width: double.infinity,
+      color: HexColor('#ECEFF0'),
+      padding: EdgeInsets.only(left: 12),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Container(
+              height: 45,
+              child: TextFormField(
+                focusNode: fSearch,
+                controller: _controller,
+                onChanged: (value) => onFilter(value),
+                textInputAction: TextInputAction.search,
+                onFieldSubmitted: (value) {
+                  if (resultCategory.length > 0) {
+                    Navigator.pushNamed(context, '/cate',
+                        arguments: resultCategory[0]);
+                  } else {
+                    if (resultBrand.length > 0) {
+                      Navigator.pushNamed(context, '/brand',
+                          arguments: resultBrand[0]);
+                    }
+                  }
+                },
+                decoration: InputDecoration(
+                  fillColor: Colors.white,
+                  filled: true,
+                  hintText: "ស្វែងរកតាម អាវ&ប្រេន",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  prefixIcon: Container(
+                    margin: EdgeInsets.only(bottom: 5),
+                    child: Icon(
+                      Icons.search,
+                      color: HexColor('#8E8E93'),
+                    ),
+                  ),
+                  suffixIcon: GestureDetector(
+                    onTap: onClearText,
+                    child: Icon(
+                      Icons.close,
+                      color: HexColor('#8E8E93'),
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.zero,
                 ),
               ),
-              suffixIcon: GestureDetector(
-                onTap: onClearText,
-                child: Icon(
-                  Icons.close,
-                  color: HexColor('#8E8E93'),
-                ),
-              ),
-              contentPadding: EdgeInsets.zero,
             ),
           ),
-        ),
-        actions: <Widget>[
           GestureDetector(
             onTap: () {
               Navigator.pop(context);
             },
             child: Container(
-              width: 100,
+              padding: EdgeInsets.symmetric(horizontal: 12),
               child: Center(
                 child: Text("បោះបង់"),
               ),
             ),
-          )
+          ),
         ],
       ),
-      body: isReady
-          ? ListView(
-              children: <Widget>[
-                listHeader("ប្រភេទ ​៖​"),
-                ListView.separated(
-                  physics: NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  separatorBuilder: (BuildContext context, int index) {
-                    return Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: HexColor('#DCDCDC'),
-                    );
-                  },
-                  itemCount: resultCategory.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return _searchCard(resultCategory[index]);
-                  },
-                ),
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: HexColor('#DCDCDC'),
-                ),
-                listHeader("ប្រេន ​៖​"),
-                ListView.separated(
-                  physics: NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  separatorBuilder: (BuildContext context, int index) {
-                    return Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: HexColor('#DCDCDC'),
-                    );
-                  },
-                  itemCount: resultBrand.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return _brandCard(resultBrand[index]);
-                  },
-                ),
-              ],
-            )
-          : Center(
-              child: Loading(),
-            ),
     );
   }
 
@@ -216,6 +245,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _searchCard(CategoryMenu item) {
+
     return ListTile(
       onTap: () {
         Navigator.pushNamed(context, '/cate', arguments: item);
@@ -227,6 +257,91 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Text("${item.name}"),
       ),
     );
+//
+//    if (item.categories.length == 0) {
+//      return ListTile(
+//        onTap: () {
+//          Navigator.pushNamed(context, '/cate', arguments: item);
+//        },
+//        title: Container(
+//          height: 50,
+//          alignment: Alignment.centerLeft,
+//          padding: EdgeInsets.only(left: 15),
+//          child: Text("${item.name}"),
+//        ),
+//      );
+//    }
+//
+//    return ExpansionTile(
+//      title: Container(
+//        height: 50,
+//        alignment: Alignment.centerLeft,
+//        padding: EdgeInsets.only(left: 15),
+//        child: Text(
+//          "${item.name}",
+//          style: TextStyle(
+//            color: Colors.black,
+//          ),
+//        ),
+//      ),
+//      children: <Widget>[
+//        ListView.builder(
+//          padding: EdgeInsets.only(left: 20),
+//          itemCount: item.categories.length,
+//          itemBuilder: (BuildContext context, int index) {
+//            Categories items = item.categories[index];
+//
+//            CategoryMenu currentCate = new CategoryMenu(
+//              id: items.id,
+//              name: items.name,
+//              iconImage: items.icon,
+//            );
+//
+//            return GestureDetector(
+//              onTap: () {
+//                Navigator.pop(context);
+//                Navigator.pushNamed(
+//                  context,
+//                  '/cate',
+//                  arguments: currentCate,
+//                );
+//              },
+//              child: Container(
+//                alignment: Alignment.center,
+//                margin: EdgeInsets.only(top: 8),
+//                color: whiteColor,
+//                child: Row(
+//                  mainAxisAlignment: MainAxisAlignment.center,
+//                  crossAxisAlignment: CrossAxisAlignment.center,
+//                  children: <Widget>[
+//                    Expanded(
+//                      flex: 1,
+//                      child: Container(
+//                        height: 35,
+//                        child: items.icon != null
+//                            ? Image.network(Api.mainUrl + items.icon.url)
+//                            : Icon(Icons.error),
+//                      ),
+//                    ),
+//                    Expanded(
+//                      flex: 4,
+//                      child: Text(
+//                        '${items.name}',
+//                        style: TextStyle(
+//                          fontSize: 16,
+//                        ),
+//                      ),
+//                    ),
+//                  ],
+//                ),
+//              ),
+//            );
+//          },
+//          shrinkWrap: true,
+//          physics: NeverScrollableScrollPhysics(),
+//        ),
+//      ],
+//    );
   }
 
   Widget _brandCard(CategoryMenu item) {

@@ -10,17 +10,20 @@ class Product {
   Brand brand;
   Brand category;
   List<ProductImage> image;
+  bool isFavorite;
 
-  Product(
-      {this.id,
-      this.title,
-      this.code,
-      this.price,
-      this.description,
-      this.productType,
-      this.brand,
-      this.category,
-      this.image});
+  Product({
+    this.id,
+    this.title,
+    this.code,
+    this.price,
+    this.description,
+    this.productType,
+    this.brand,
+    this.category,
+    this.image,
+    this.isFavorite,
+  });
 
   Product.fromJson(Map<String, dynamic> json) {
     CategoryRepository cateRepo = CategoryRepository();
@@ -33,14 +36,16 @@ class Product {
     productType = json['product_type'];
 //    brand = json['brand'] != null ? new Brand.fromJson(json['brand']) : null;
     if (json['category'] is int) {
+      category = json['category'];
 //      category = new Brand(
 ////        id: myBrand.id,
 ////        name: myBrand.name,
 ////        icon: myBrand.icon,
 ////      );
     } else {
-      category =
-      json['category'] != null ? new Brand.fromJson(json['category']) : null;
+      category = json['category'] != null
+          ? new Brand.fromJson(json['category'])
+          : null;
     }
 
     if (json['image'] != null) {
@@ -49,6 +54,7 @@ class Product {
         image.add(new ProductImage.fromJson(v));
       });
     }
+    isFavorite = false;
   }
 
   Map<String, dynamic> toJson() {
@@ -68,6 +74,7 @@ class Product {
     if (this.image != null) {
       data['image'] = this.image.map((v) => v.toJson()).toList();
     }
+
     return data;
   }
 }

@@ -3,8 +3,12 @@ import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:guitarfashion/event/CategoryEvent.dart';
 import 'package:guitarfashion/model/CategoryMenu.dart';
+import 'package:guitarfashion/model/FavoriteModel.dart';
 import 'package:guitarfashion/model/Product.dart';
+import 'package:guitarfashion/model/UserModel.dart';
+import 'package:guitarfashion/repository/AuthRepository.dart';
 import 'package:guitarfashion/repository/BrandsRepository.dart';
+import 'package:guitarfashion/repository/FavoriteRepository.dart';
 import 'package:guitarfashion/state/CategoryState.dart';
 import 'package:guitarfashion/utils/Api.dart';
 import 'package:http/http.dart' as http;
@@ -23,6 +27,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       page: state.page,
       isFilter: state.isFilter,
       categoryName: state.categoryName,
+      listFavorite: state.listFavorite,
     );
 
     // TODO: implement mapEventToState
@@ -49,18 +54,56 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       fetchListCategoryOfBrands(event.categoryId,event.listBrand);
     }
 
+    if (event is UpdateFavorite) {
+      Product tmp = categoryState.listProduct.firstWhere(
+              (element) => element.id.toString() == event.productId,
+          orElse: () => null);
+
+      FavoriteModel tmpFav = new FavoriteModel(
+        id: tmp.id,
+        price: tmp.price,
+        code: tmp.code,
+        description: tmp.description,
+        productType: tmp.productType,
+      );
+
+      if (event.status) {
+        //Favorite
+        if (tmp != null) {
+          categoryState.listFavorite.add(tmpFav);
+        }
+      } else {
+        //UnFavorite
+        if (tmp != null) {
+          int proIndex = categoryState.listFavorite.indexWhere((element) => element.id == tmpFav.id);
+          print(proIndex);
+          categoryState.listFavorite.removeAt(proIndex);
+        }
+      }
+      yield categoryState;
+    }
+    
     if (event is UpdateData) {
       print("UpdateData :${categoryState.page}");
       categoryState.listProduct = event.list;
       categoryState.isLoading = false;
-//      productState.page = productState.page+1;
+//      categoryState.page = categoryState.page+1;
       yield categoryState;
     }
 
     if(event is FinishLoadData){
       print("else FinishLoadData Pro123 ${state.listProduct}");
-      categoryState.listProduct = null;
       categoryState.isLoading = false;
+      yield categoryState;
+    }
+
+    if(event is LoadFavoriteProduct) {
+      UserModel currentUser = await AuthRepository.getUser();
+
+      List<FavoriteModel> myFavorite = await FavoriteRepository.getListFavorite(currentUser.customer.toString());
+
+      categoryState.listFavorite = myFavorite;
+
       yield categoryState;
     }
 
@@ -69,7 +112,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   fetchListOfCategory(int cateId) async {
-    var response = await http.get(Api.list_category + cateId.toString());
+    var response = await http.get(Api.list_category + cateId.toString() + "&_sort=id:DESC");
 
     if (response.statusCode == 200) {
       //Request Success 200

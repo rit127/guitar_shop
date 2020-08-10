@@ -29,6 +29,23 @@ class UpdateData extends ProductEvent{
   List<Object> get props => [list];
 }
 
+class UpdateFavorite extends ProductEvent {
+  String productId;
+  bool status;
+
+  UpdateFavorite(this.productId, this.status);
+
+  @override
+  // TODO: implement props
+  List<Object> get props => [productId, status];
+}
+
+class LoadFavoriteProduct extends ProductEvent {
+  @override
+  // TODO: implement props
+  List<Object> get props => null;
+}
+
 class FinishLoadData extends ProductEvent{
 
   @override
@@ -45,4 +62,10 @@ class UpdateViewCount extends ProductEvent{
   @override
   // TODO: implement props
   List<Object> get props => [this.slug];
+}
+
+class ClearFavorite extends ProductEvent {
+  @override
+  // TODO: implement props
+  List<Object> get props => null;
 }

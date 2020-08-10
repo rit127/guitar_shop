@@ -21,7 +21,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     if (event is LoadDrawerMenu) {
       List<CategoryMenu> list = await getDrawerMenu();
       homeState.drawerMenu = list;
-      print("he ${list.length}");
+
       yield homeState;
     }
   }

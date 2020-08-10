@@ -8,7 +8,8 @@ import 'package:http/http.dart' as http;
 class ProductRepository {
 
   static Future<List<Product>> getProduction(int start, int end) async {
-    var response = await http.get(Api.product + "?_sort=id:DESC&_start=$start&_limit=$end");
+//    var response = await http.get(Api.product + "?_sort=id:DESC&_start=$start&_limit=$end");
+    var response = await http.get(Api.product + "?_sort=id:DESC");
 
     if(response.statusCode == 200) {
       //Request Success 200
